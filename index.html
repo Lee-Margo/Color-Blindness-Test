@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        body{
+            background-color: #f06060;
+            margin:0;            
+            color:lightcyan;
+            position:relative;
+        }
+        .home-page, .play-page, .stop-page{
+            width: 100%;
+            height: 100vh;
+            display:flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .stop-page{
+            opacity: 60%;
+        }
+        .buttons{
+            display:flex;
+        }
+        .play, .continue, .restart, .pause{
+            width:125px;
+            height: 50px;
+            background-color: orange;
+            line-height: 50px;
+            text-align:center;
+            border-radius: 10px;
+            cursor: pointer;
+            padding:0;
+        }
+        .play, .pause, .continue{
+            margin-right: 10px;
+        }
+        .big-box{
+            background-color: #d3d3d3;
+            width: 520px;
+            height: 520px;
+            margin:auto;
+            display:flex;
+            flex-wrap: wrap;
+            padding:10px;
+            border-radius: 5%;
+            margin-top:calc((100vh - 520px)/2);
+        }
+        .box{
+            width: 50%;
+            height: 50%;
+            background-color: aqua;
+            border: solid 5px #d3d3d3;
+            border-radius: 5%;
+        }
+        .answer{
+            opacity: 0.6;
+        }
+        .game-page{
+            display:flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin: 0px 5px;
+        }
+        .left{
+            display:flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .score{
+            color: lightgray;
+        }
+        #clock{
+            color: black;
+            background-color: lightgray;
+            opacity: 45%;
+            width: 50px;
+            text-align: center;
+        }
+        .pause{
+            width:70px;
+            height: 30px;
+            background-color: orange;
+            text-align:center;
+            border-radius: 10px;
+            cursor: pointer;
+            line-height:30px;
+            padding:0;
+        }
+        .right{
+            margin:auto;
+        }
+        .result-page{
+            display:flex;
+            flex-direction: column;
+        }
+        .result-score{
+            margin: auto;
+            margin-bottom: 20px;
+        }
+        .result-page .restart{
+            margin: auto;
+        }
+        .mask{
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+            opacity: 0.5;
+        }
+         .hidden{
+            display:none;
+        }
+        .show-flex{
+            display:flex;
+        }
+        .show{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-page">
+        <h1>免費色弱遊戲</h1>
+        <div class="buttons">
+            <div class="play">PLAY</div>
+        </div>       
+    </div>
+    <div class="stop-page hidden">
+        <h1>暫停中</h1>
+        <div class="buttons">
+            <div class="continue">CONTINUE</div>
+            <div class="restart">EXIT</div>
+        </div>       
+    </div>
+    <div class="game-page hidden">
+        <div class="left">
+            <span class="score"></span>
+            <div id="clock"></div>
+            <button class="pause">PAUSE</button>
+        </div>
+        <div class="right">
+            <div class="big-box"></div>
+        </div>       
+    </div>
+    <div class="result-page mask hidden">
+        <h1 class="result-score"></h1>
+        <button class="restart">RESTART</button>
+    </div>
+
+    <script>
+        let homePage = document.querySelector('.home-page');
+        let gamePage = document.querySelector('.game-page');
+        let stopPage = document.querySelector('.stop-page');
+        let resultPage = document.querySelector('.result-page');
+        
+        let playBtn = document.querySelector('.play');
+        let continueBtn = document.querySelector('.continue');       
+        let pauseBtn = document.querySelector('.pause');
+        let stopRestartBtn = document.querySelector('.buttons .restart');
+        let resultRestartBtn = document.querySelector('.result-page .restart');
+
+        
+        // 時間
+        let clock = document.querySelector('#clock');
+        const totalTime = 60;
+        let counterInterval;
+
+        //分數和顯示
+        const scoreStart = 0;
+        let score = document.querySelector('.score');
+        let resultScore = document.querySelector('.result-score');
+
+        //  設定基本變數 for 遊戲
+        let counter;
+        let scoreCount;
+        let level;
+        let size;
+        let count;
+        const startLevel = 2;;
+        const startCount = 0;       
+        let bigBox = document.querySelector('.big-box');
+        
+
+        startGame();
+        stopGame();
+        continueGame();
+        stopRestartGame();
+        resultRestartGame();
+       
+
+        function startGame(){
+            playBtn.addEventListener('click',() =>{
+                
+                //在startGame裡清空所有數值
+                counter = totalTime;
+                scoreCount = scoreStart;
+                level = startLevel;
+                size = 100 / level
+                count = startCount;
+
+                //這裡顯示的是最一開始的時間&分數
+                clock.innerHTML = counter;
+                score.innerHTML = `<span class="score">得分: ${scoreCount}</span>`;
+
+                homePage.classList.add('hidden');
+                gamePage.classList.remove('hidden');
+                counterInterval = setInterval(counterClock, 1000);
+                game();
+            });
+        };
+        function stopGame(){
+            pauseBtn.addEventListener('click',() =>{
+                gamePage.classList.add('hidden');
+                stopPage.classList.remove('hidden');
+                counterStop();
+            })
+        }
+        function continueGame(){
+            continueBtn.addEventListener('click',() =>{
+                stopPage.classList.add('hidden');
+                gamePage.classList.remove('hidden');
+                counterInterval = setInterval(counterClock, 1000);
+            })
+        }
+        function stopRestartGame(){
+            stopRestartBtn.addEventListener('click',() =>{
+                stopPage.classList.add('hidden');
+                resultPage.classList.remove('hidden');
+                resultScore.innerHTML = `<h1 class="result-score">Your Last Score is: ${scoreCount}</h1>`
+            })
+        }
+        function resultRestartGame(){
+            resultRestartBtn.addEventListener('click',() =>{
+                resultPage.classList.add('hidden');
+                homePage.classList.remove('hidden');
+                
+            })
+        }
+
+
+        function counterClock(){
+            if(counter>0){
+                clock.innerHTML = --counter;
+            }else{
+                alert('Time Stop!');
+                counterStop();
+                gamePage.classList.add('hidden');
+                resultPage.classList.remove('hidden');
+                resultScore.innerHTML = `<h1 class="result-score">Your Last Score is: ${scoreCount}</h1>`
+            };
+        };
+
+        function counterStop(){
+            clearInterval(counterInterval);
+        };
+
+
+
+
+        
+        
+        
+        function game(){
+
+            bigBox.innerHTML = '';
+
+            // 2. 產生小box
+            let color = 
+                `rgb(${Math.floor(Math.random()*257)+1},${Math.floor(Math.random()*257)+1},${Math.floor(Math.random()*257)+1})`;
+
+            for(let i = 0; i<level**2; i++){
+                bigBox.innerHTML += `<div class = "box" style = "width: ${size}%; height: ${size}%; background-color: ${color};">`
+            };
+
+            //3. 產生解答方塊
+            let randomAnswer = Math.floor(Math.random() * level ** 2)+1;
+            let answerBox = document.querySelector(`.big-box .box:nth-of-type(${randomAnswer})`);
+            answerBox.classList.add("answer");
+
+            //4. 變動的opacity
+            answerBox.style.opacity = `${0.5 + level*0.025}`;
+
+            //5. 互動 綁監聽事件
+            let answerBtn = document.querySelector('.answer');
+            answerBtn.addEventListener('click', function(){   
+                count ++;
+                scoreCount++;
+                if (count === level){
+                    level++;
+                    size = 100 / level;
+                    count = 0;
+                }
+                game();
+                score.innerHTML = `<span class="score">得分: ${scoreCount}</span>`;
+            });
+        };
+
+        
+    </script>
+</body>
+</html>
